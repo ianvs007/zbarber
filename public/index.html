@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Z-BARBER — Sistema de Gestión y Turnos</title>
+  <meta name="description" content="Sistema de gestión para Z-BARBER (Santa Cruz, Bolivia): control estricto de turnos, barberos, servicios y reportes.">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+  <script src="/js/auth.js"></script>
+  <script>requireSession('admin');</script>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- 1. SIDEBAR LATERAL PERMANENTE (Requisito Oficial) -->
+    <aside class="sidebar">
+      <div>
+        <div class="brand">
+          <div class="brand-emblem">Z</div>
+          <div class="brand-text">
+            <h1>Z-BARBER</h1>
+            <span>— EST. 2025 —</span>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="#dashboard" class="nav-item active" data-view="dashboard">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>Dashboard</span>
+          </a>
+          <a href="#reservas" class="nav-item" data-view="reservas">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Reservas y Pagos</span>
+            <span class="nav-badge" id="badge-pagos" style="display: none;"></span>
+          </a>
+          <a href="#clientes" class="nav-item" data-view="clientes">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Clientes</span>
+          </a>
+          <a href="#servicios" class="nav-item" data-view="servicios">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+            <span>Servicios</span>
+          </a>
+          <a href="#barberos" class="nav-item" data-view="barberos">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+            <span>Barberos</span>
+          </a>
+          <a href="#finanzas" class="nav-item" data-view="finanzas">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span>Finanzas y Gastos</span>
+          </a>
+          <a href="#reportes" class="nav-item" data-view="reportes">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span>Reportes</span>
+          </a>
+          <a href="#configuracion" class="nav-item" data-view="configuracion">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>QR y Horario</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Pie del Sidebar -->
+      <div style="background-color: var(--bg-card); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+        <p style="font-size: 11px; font-style: italic; color: var(--gold-bright);">
+          "La disciplina también es parte del estilo."
+        </p>
+        <span id="sidebar-user" style="font-size: 9px; color: var(--text-muted); display: block; margin-top: 4px; text-transform: uppercase;"></span>
+        <button id="btn-cambiar-password" style="margin-top: 10px; width: 100%; background: transparent; border: 1px solid var(--border-gold); color: var(--gold-bright); padding: 8px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px;">Cambiar contraseña</button>
+      </div>
+    </aside>
+
+    <!-- 2. ÁREA DE CONTENIDO PRINCIPAL -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search">
+          <svg style="position: absolute; left: 12px; top: 12px; width: 16px; height: 16px; color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="buscador-global" placeholder="Buscar reservas por cliente, teléfono o servicio...">
+        </div>
+
+        <div class="header-actions">
+          <div class="date-indicator">
+            <span style="color: var(--gold-bright); font-weight: bold;">Hoy:</span>
+            <span id="fecha-hoy"></span>
+          </div>
+
+          <button class="btn-gold" id="btn-open-presencial">
+            <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Atención Presencial</span>
+          </button>
+          <button class="btn-accion" id="btn-logout" style="padding: 10px 14px; font-size: 12px;">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <main class="content-body">
+        <!-- VISTA: DASHBOARD -->
+        <section id="view-dashboard" class="view-section">
+          <div class="aviso alerta" id="aviso-pagos-dashboard" style="display: none;"></div>
+
+          <div class="kpi-grid">
+            <div class="kpi-card highlight">
+              <div class="kpi-title"><span>INGRESOS DEL DÍA</span></div>
+              <div class="kpi-value" id="kpi-ingresos-hoy">—</div>
+              <small style="color: var(--text-muted); font-size: 11px;">Pagos aprobados hoy</small>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title"><span>CITAS HOY</span></div>
+              <div class="kpi-value" id="kpi-citas-hoy">—</div>
+              <small style="color: var(--text-muted); font-size: 11px;">Reservas y atenciones del día</small>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title"><span>CLIENTES REGISTRADOS</span></div>
+              <div class="kpi-value" id="kpi-clientes">—</div>
+              <small style="color: var(--text-muted); font-size: 11px;">Base de datos de clientes</small>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title">
+                <span>PAGOS POR REVISAR</span>
+                <span style="color: var(--status-yellow);">QR</span>
+              </div>
+              <div class="kpi-value" id="kpi-pendientes">—</div>
+              <small style="color: var(--text-muted); font-size: 11px;">Comprobantes esperando tu aprobación</small>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="font-size: 16px; font-weight: 700; color: #fff;">Agenda del Día</h3>
+              <span style="color: var(--gold-bright); font-size: 12px; font-family: monospace;">AGENDA ACTIVA</span>
+            </div>
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Hora</th>
+                  <th>Cliente</th>
+                  <th>Servicio</th>
+                  <th>Barbero</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-reservas-hoy"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VISTA: RESERVAS Y PAGOS -->
+        <section id="view-reservas" class="view-section" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2 style="font-size: 20px; font-weight: bold; color: #fff;">Reservas y Pagos</h2>
+              <p style="font-size: 12px; color: var(--text-muted);">Revisa comprobantes en tu banco, aprueba pagos y registra la atención de cada cita</p>
+            </div>
+          </div>
+
+          <div class="filtros">
+            <div class="form-group">
+              <label>Estado</label>
+              <select id="filtro-estado" class="form-control">
+                <option value="all">Todos</option>
+                <option value="en_revision">Pago en revisión</option>
+                <option value="pendiente_pago">Esperando pago</option>
+                <option value="confirmada">Confirmadas</option>
+                <option value="atendida">Atendidas</option>
+                <option value="cancelada">Canceladas</option>
+                <option value="no_asistio">No asistió</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Fecha</label>
+              <input type="date" id="filtro-fecha" class="form-control">
+            </div>
+            <button class="btn-accion" id="btn-limpiar-filtros" style="padding: 10px 14px;">Limpiar filtros</button>
+          </div>
+
+          <div class="table-card">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Fecha y hora</th>
+                  <th>Cliente</th>
+                  <th>Servicio / Barbero</th>
+                  <th style="text-align: center;">Tipo</th>
+                  <th>Total / Pagado / Saldo</th>
+                  <th>Estado</th>
+                  <th style="text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-todas-reservas"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VISTA: CLIENTES CON CRUD -->
+        <section id="view-clientes" class="view-section" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2 style="font-size: 20px; font-weight: bold; color: #fff;">Directorio de Clientes</h2>
+              <p style="font-size: 12px; color: var(--text-muted);">Crea, edita datos de contacto o gestiona los clientes registrados.</p>
+            </div>
+            <button class="btn-gold" id="btn-open-new-client">
+              + Nuevo Cliente
+            </button>
+          </div>
+
+          <div id="alert-clientes" class="aviso error" style="display: none;"></div>
+
+          <div class="table-card">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>Email</th>
+                  <th>Visitas</th>
+                  <th style="text-align: right;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-clientes"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VISTA: SERVICIOS CON CRUD COMPLETO Y PROTEGIDO -->
+        <section id="view-servicios" class="view-section" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2 style="font-size: 20px; font-weight: bold; color: #fff;">Catálogo de Servicios y Tarifas (CRUD)</h2>
+              <p style="font-size: 12px; color: var(--text-muted);">Crea, edita tarifas o elimina servicios. Protegido contra reservas pendientes.</p>
+            </div>
+            <button class="btn-gold" id="btn-open-new-service">
+              + Nuevo Servicio
+            </button>
+          </div>
+
+          <div id="alert-servicios" class="aviso error" style="display: none;"></div>
+
+          <div class="table-card">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Servicio</th>
+                  <th>Precio Local</th>
+                  <th>Precio Domicilio</th>
+                  <th>Duración</th>
+                  <th>Citas Activas</th>
+                  <th>Estado</th>
+                  <th style="text-align: right;">Acciones (CRUD)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-servicios"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VISTA: BARBEROS CON CRUD COMPLETO Y MATRIZ -->
+        <section id="view-barberos" class="view-section" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2 style="font-size: 20px; font-weight: bold; color: #fff;">Equipo de Barberos y Habilidades (CRUD)</h2>
+              <p style="font-size: 12px; color: var(--text-muted);">Personaliza tu equipo. No permite borrar barberos con citas asignadas.</p>
+            </div>
+            <button class="btn-gold" id="btn-open-new-barber">
+              + Nuevo Barbero
+            </button>
+          </div>
+
+          <div id="alert-barberos" class="aviso error" style="display: none;"></div>
+
+          <div class="kpi-grid" id="grid-barberos"></div>
+
+          <div class="table-card" style="margin-top: 24px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 12px;">Matriz de Asignación de Servicios (barbero_servicio)</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Marca o desmarca los servicios que cada barbero realiza. No se puede desasignar si tiene citas pendientes agendadas.</p>
+            <table class="custom-table">
+              <thead>
+                <tr id="thead-matriz-tr">
+                  <th>Servicio</th>
+                  <th>Precio</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-matriz-habilidades"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VISTA: FINANZAS Y GASTOS -->
+        <section id="view-finanzas" class="view-section" style="display: none;">
+          <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 16px;">Control de Gastos Operativos</h2>
+          <div class="table-card">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Categoría</th>
+                  <th>Monto</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-gastos"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- VISTA: REPORTES -->
+        <section id="view-reportes" class="view-section" style="display: none;">
+          <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 16px;">Reportes y Estadísticas</h2>
+
+          <div class="filtros">
+            <div class="form-group">
+              <label>Desde</label>
+              <input type="date" id="rep-desde" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Hasta</label>
+              <input type="date" id="rep-hasta" class="form-control">
+            </div>
+            <button class="btn-gold" id="btn-rep-aplicar">Aplicar</button>
+            <button class="btn-accion" id="btn-rep-mes" style="padding: 10px 14px;">Este mes</button>
+            <button class="btn-accion" id="btn-rep-todo" style="padding: 10px 14px;">Todo el historial</button>
+          </div>
+          <p id="rep-periodo" style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;"></p>
+
+          <div class="kpi-grid">
+            <div class="kpi-card highlight">
+              <div class="kpi-title">INGRESOS (PAGOS APROBADOS)</div>
+              <div class="kpi-value" id="rep-ingresos">—</div>
+              <small style="color: var(--text-muted); font-size: 11px;" id="rep-ingresos-detalle"></small>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">GASTOS OPERATIVOS</div>
+              <div class="kpi-value" style="color: var(--status-red);" id="rep-gastos">—</div>
+            </div>
+            <div class="kpi-card highlight">
+              <div class="kpi-title">UTILIDAD NETA</div>
+              <div class="kpi-value" id="rep-utilidad">—</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">SALDO POR COBRAR EN LOCAL</div>
+              <div class="kpi-value" id="rep-saldo">—</div>
+              <small style="color: var(--text-muted); font-size: 11px;">50% restante de reservas confirmadas</small>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">REEMBOLSOS PENDIENTES</div>
+              <div class="kpi-value" style="color: var(--status-yellow);" id="rep-reembolsos">—</div>
+              <small style="color: var(--text-muted); font-size: 11px;">Anticipos que debes devolver</small>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">CITAS DEL PERIODO</div>
+              <div class="kpi-value" id="rep-citas">—</div>
+              <small style="color: var(--text-muted); font-size: 11px;" id="rep-citas-detalle"></small>
+            </div>
+          </div>
+        </section>
+
+        <!-- VISTA: CONFIGURACIÓN (QR Y HORARIO) -->
+        <section id="view-configuracion" class="view-section" style="display: none;">
+          <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 16px;">QR de Pago y Horario de Atención</h2>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+            <div class="table-card">
+              <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px;">QR del negocio</h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Los clientes lo verán para pagar el 50% de su reserva. Solo JPG o PNG, máximo 5 MB.</p>
+              <div id="qr-actual" style="text-align: center; color: var(--text-muted); font-size: 13px;"></div>
+              <form id="form-qr">
+                <div class="form-group">
+                  <label>Banco</label>
+                  <input type="text" id="qr-banco" maxlength="100" class="form-control" placeholder="Ej: Banco Unión">
+                </div>
+                <div class="form-group">
+                  <label>Titular de la cuenta</label>
+                  <input type="text" id="qr-titular" maxlength="100" class="form-control" placeholder="Ej: Carlos Dueño">
+                </div>
+                <div class="form-group">
+                  <label>Imagen del QR (para reemplazar el actual)</label>
+                  <input type="file" id="qr-archivo" accept="image/png,image/jpeg" class="form-control">
+                </div>
+                <button type="submit" class="btn-gold">Guardar QR</button>
+              </form>
+            </div>
+
+            <div class="table-card">
+              <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px;">Horario de atención</h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Las reservas solo se aceptan si la atención completa cabe dentro de este horario.</p>
+              <form id="form-horario">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Día</th>
+                      <th>Abierto</th>
+                      <th>Apertura</th>
+                      <th>Cierre</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-horario"></tbody>
+                </table>
+                <button type="submit" class="btn-gold" style="margin-top: 16px;">Guardar Horario</button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: ATENCIÓN PRESENCIAL (CLIENTE SIN RESERVA) -->
+  <div class="modal-overlay" id="modal-presencial">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Registrar Atención Presencial</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="aviso info">Cliente que llegó sin reserva. Solo se registra si el barbero no tiene reservas en ese horario: las reservas tienen prioridad.</div>
+
+      <form id="form-presencial">
+        <div class="form-group">
+          <label>Cliente</label>
+          <select id="pres-cliente" class="form-control"></select>
+        </div>
+        <div id="pres-nuevo-cliente" style="display: none; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Nombre *</label>
+            <input type="text" id="pres-nombre" maxlength="100" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input type="text" id="pres-telefono" maxlength="20" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Servicio</label>
+          <select id="pres-servicio" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Barbero</label>
+          <select id="pres-barbero" class="form-control"></select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Hora de inicio (hoy)</label>
+            <input type="time" id="pres-hora" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Método de pago</label>
+            <select id="pres-metodo" class="form-control">
+              <option value="efectivo">Efectivo</option>
+              <option value="qr">QR</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notas</label>
+          <input type="text" id="pres-notas" maxlength="500" class="form-control">
+        </div>
+
+        <p id="pres-total" style="text-align: right; color: var(--gold-bright); font-weight: bold;"></p>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+          <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-gold">Registrar y Cobrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REVISAR COMPROBANTE DE PAGO -->
+  <div class="modal-overlay" id="modal-revisar-pago">
+    <div class="modal-content" style="max-width: 720px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Revisar Comprobante de Pago</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <div id="revision-datos" style="font-size: 13px; margin-bottom: 12px;"></div>
+      <div class="aviso alerta">Antes de aprobar, ingresa a tu banco y confirma que recibiste este monto. El comprobante por sí solo no garantiza el pago.</div>
+      <div id="revision-visor" style="margin-bottom: 16px;"></div>
+
+      <div class="form-group">
+        <label>Motivo del rechazo (obligatorio solo si rechazas)</label>
+        <input type="text" id="revision-motivo" maxlength="255" class="form-control" placeholder="Ej: El pago no figura en el banco">
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-accion rojo" id="btn-rechazar-pago" style="padding: 10px 16px; font-size: 13px;">Rechazar</button>
+        <button type="button" class="btn-gold" id="btn-aprobar-pago">Aprobar Pago</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ATENDER Y COBRAR SALDO -->
+  <div class="modal-overlay" id="modal-atender">
+    <div class="modal-content" style="max-width: 420px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Atender y Cobrar Saldo</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+      <div id="atender-datos" style="font-size: 13px; margin-bottom: 12px;"></div>
+      <div class="form-group">
+        <label>Método de pago del saldo</label>
+        <select id="atender-metodo" class="form-control">
+          <option value="efectivo">Efectivo</option>
+          <option value="qr">QR</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+        <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Cancelar</button>
+        <button type="button" class="btn-gold" id="btn-confirmar-atencion">Confirmar Atención</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO SERVICIO (CRUD) -->
+  <div class="modal-overlay" id="modal-nuevo-servicio">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Agregar Nuevo Servicio al Catálogo</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="form-nuevo-servicio">
+        <div class="form-group">
+          <label>Nombre del Servicio *</label>
+          <input type="text" id="nuevo-serv-nombre" required placeholder="Ej: Corte Fade + Lavado" class="form-control">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Precio en Local (Bs) *</label>
+            <input type="number" id="nuevo-serv-precio" required min="5" step="0.5" value="35" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Precio a Domicilio (Bs)</label>
+            <input type="number" id="nuevo-serv-domicilio" min="0" step="0.5" value="60" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Duración Estimada (Minutos) *</label>
+          <input type="number" id="nuevo-serv-duracion" required min="5" step="5" value="30" class="form-control">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-gold">Crear Servicio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR SERVICIO (CRUD) -->
+  <div class="modal-overlay" id="modal-editar-servicio">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Modificar Servicio</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="form-editar-servicio">
+        <input type="hidden" id="edit-serv-id">
+        <div class="form-group">
+          <label>Nombre del Servicio *</label>
+          <input type="text" id="edit-serv-nombre" required class="form-control">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Precio en Local (Bs) *</label>
+            <input type="number" id="edit-serv-precio" required min="5" step="0.5" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Precio a Domicilio (Bs)</label>
+            <input type="number" id="edit-serv-domicilio" min="0" step="0.5" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Duración (Minutos) *</label>
+          <input type="number" id="edit-serv-duracion" required min="5" step="5" class="form-control">
+          <small style="color: var(--text-muted); font-size: 11px;">Nota: No se puede cambiar la duración si tiene citas pendientes agendadas.</small>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-gold">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO BARBERO (CRUD) -->
+  <div class="modal-overlay" id="modal-nuevo-barbero">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Registrar Nuevo Barbero</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="form-nuevo-barbero">
+        <div class="form-group">
+          <label>Nombre Completo *</label>
+          <input type="text" id="nuevo-barb-nombre" required placeholder="Ej: Rodrigo Calvimontes" class="form-control">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Género</label>
+            <select id="nuevo-barb-sexo" class="form-control">
+              <option value="M">Masculino (M)</option>
+              <option value="F">Femenino (F)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Años de Experiencia</label>
+            <input type="number" id="nuevo-barb-exp" min="0" max="40" value="3" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Teléfono de Contacto</label>
+          <input type="text" id="nuevo-barb-tel" placeholder="77654321" class="form-control">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-gold">Guardar Barbero</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO CLIENTE (CRUD) -->
+  <div class="modal-overlay" id="modal-nuevo-cliente">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Registrar Nuevo Cliente</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="form-nuevo-cliente">
+        <div class="form-group">
+          <label>Nombre Completo *</label>
+          <input type="text" id="nuevo-cli-nombre" required placeholder="Ej: Carlos Sánchez" maxlength="100" class="form-control">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input type="text" id="nuevo-cli-telefono" required placeholder="Ej: 71234567" maxlength="20" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="nuevo-cli-email" placeholder="cliente@correo.com" maxlength="100" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notas / Preferencias</label>
+          <input type="text" id="nuevo-cli-notas" placeholder="Ej: Prefiere corte degradado" maxlength="500" class="form-control">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-gold">Guardar Cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR CLIENTE (CRUD) -->
+  <div class="modal-overlay" id="modal-editar-cliente">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Modificar Cliente</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="form-editar-cliente">
+        <input type="hidden" id="edit-cli-id">
+        <div class="form-group">
+          <label>Nombre Completo *</label>
+          <input type="text" id="edit-cli-nombre" required maxlength="100" class="form-control">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input type="text" id="edit-cli-telefono" required maxlength="20" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="edit-cli-email" maxlength="100" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notas / Preferencias</label>
+          <input type="text" id="edit-cli-notas" maxlength="500" class="form-control">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-gold">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CAMBIAR CONTRASEÑA DEL ADMINISTRADOR -->
+  <div class="modal-overlay" id="modal-cambiar-password">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Cambiar Contraseña</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="form-cambiar-password">
+        <div class="form-group">
+          <label>Contraseña actual *</label>
+          <input type="password" id="pass-actual" required autocomplete="current-password" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Nueva contraseña * (mínimo 4 caracteres)</label>
+          <input type="password" id="pass-nueva" required minlength="4" autocomplete="new-password" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Confirmar nueva contraseña *</label>
+          <input type="password" id="pass-confirmar" required minlength="4" autocomplete="new-password" class="form-control">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-gold">Guardar Contraseña</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/util.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/reservas.js"></script>
+  <script src="/js/configuracion.js"></script>
+</body>
+</html>

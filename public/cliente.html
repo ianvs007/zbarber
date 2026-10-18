@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Z-BARBER — Mis Reservas</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+  <script src="/js/auth.js"></script>
+  <script>requireSession('cliente');</script>
+</head>
+<body>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div>
+        <div class="brand">
+          <div class="brand-emblem">Z</div>
+          <div class="brand-text">
+            <h1>Z-BARBER</h1>
+            <span>— EST. 2025 —</span>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="#mis-reservas" class="nav-item active">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Mis Reservas</span>
+          </a>
+        </nav>
+
+        <div style="margin-top: 24px; font-size: 12px; color: var(--text-secondary);">
+          <p style="color: var(--gold-bright); font-weight: bold; margin-bottom: 6px;">Horario de atención</p>
+          <div id="lista-horario"></div>
+        </div>
+      </div>
+
+      <div style="background-color: var(--bg-card); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+        <span id="sidebar-user" style="font-size: 11px; color: var(--gold-bright); display: block;"></span>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="top-header">
+        <h2 style="font-size: 18px; font-weight: bold;">Mis Reservas</h2>
+        <div class="header-actions">
+          <button class="btn-gold" id="btn-open-new-booking">
+            <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Reservar Cita</span>
+          </button>
+          <button class="btn-accion" id="btn-logout" style="padding: 10px 14px; font-size: 12px;">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <main class="content-body">
+        <div class="aviso info">
+          <strong>¿Cómo reservar?</strong> Elige servicio, barbero y horario. Luego paga el <strong>50% del servicio</strong> con el QR de la barbería
+          y sube tu comprobante dentro de <strong>20 minutos</strong>; si no, el horario se libera.
+          La barbería verificará tu pago y confirmará la cita. Puedes cancelar con devolución del anticipo hasta <strong>24 horas antes</strong>.
+        </div>
+
+        <div class="table-card">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Fecha y hora</th>
+                <th>Servicio / Barbero</th>
+                <th>Montos</th>
+                <th>Estado</th>
+                <th style="text-align: right;">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-mis-reservas"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVA RESERVA DEL CLIENTE -->
+  <div class="modal-overlay" id="modal-nueva-reserva">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Reservar Cita en Z-BARBER</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="form-nueva-reserva">
+        <div class="form-group">
+          <label>Servicio</label>
+          <select id="reserva-servicio" class="form-control" required></select>
+        </div>
+
+        <div class="form-group">
+          <label>Barbero</label>
+          <select id="reserva-barbero" class="form-control" required></select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" id="reserva-fecha" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Hora</label>
+            <input type="time" id="reserva-hora" value="10:00" class="form-control" required>
+          </div>
+        </div>
+        <p id="reserva-horario-dia" style="font-size: 12px; color: var(--text-muted); margin: -8px 0 12px;"></p>
+
+        <div class="form-group" id="grupo-domicilio" style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="reserva-domicilio">
+          <label for="reserva-domicilio" style="margin: 0; cursor: pointer;">¿A Domicilio?</label>
+        </div>
+
+        <div class="form-group">
+          <label>Notas del corte</label>
+          <input type="text" id="reserva-notas" maxlength="500" placeholder="Ej: Degradado bajo, cabello fino" class="form-control">
+        </div>
+
+        <div class="aviso alerta" id="reserva-resumen"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+          <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Cancelar</button>
+          <button type="submit" class="btn-gold">Reservar y Pagar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PAGO CON QR Y SUBIDA DEL COMPROBANTE -->
+  <div class="modal-overlay" id="modal-pago">
+    <div class="modal-content" style="max-width: 460px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <h3 style="color: var(--gold-bright); font-size: 18px;">Pagar Anticipo con QR</h3>
+        <button data-close-modal style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+      </div>
+
+      <div id="pago-rechazo" class="aviso error" style="display: none;"></div>
+
+      <p style="text-align: center; font-size: 13px; color: var(--text-secondary);">Escanea el QR con la app de tu banco y paga exactamente:</p>
+      <p class="monto-pagar" id="pago-monto"></p>
+      <p style="text-align: center; font-size: 12px; color: var(--text-muted);" id="pago-detalle"></p>
+
+      <div id="pago-qr"></div>
+      <p style="text-align: center; font-size: 12px; color: var(--text-secondary);" id="pago-cuenta"></p>
+
+      <div class="aviso alerta" style="text-align: center;">Tiempo restante para subir el comprobante: <strong id="pago-contador">--:--</strong></div>
+
+      <form id="form-comprobante">
+        <div class="form-group">
+          <label>Comprobante de pago * (JPG, PNG o PDF — máx. 5 MB)</label>
+          <input type="file" id="comprobante-archivo" accept="image/jpeg,image/png,application/pdf" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>N° de transacción (opcional, ayuda a verificar tu pago)</label>
+          <input type="text" id="comprobante-nro" maxlength="50" pattern="[A-Za-z0-9-]{3,50}" class="form-control" placeholder="Ej: 123456789">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+          <button type="button" data-close-modal style="background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer;">Pagar más tarde</button>
+          <button type="submit" class="btn-gold" id="btn-enviar-comprobante">Enviar Comprobante</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/util.js"></script>
+  <script src="/js/cliente.js"></script>
+</body>
+</html>

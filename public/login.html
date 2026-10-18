@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Z-BARBER — Iniciar Sesión</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+  <style>
+    .auth-wrapper { width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .auth-card { width: 100%; max-width: 420px; background: var(--bg-surface); border: 1px solid var(--border-gold); border-radius: var(--radius-lg); padding: 32px; }
+    .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 24px 0; }
+    .auth-tab { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 10px; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; }
+    .auth-tab.active { border-color: var(--gold-bright); color: var(--gold-bright); }
+    .auth-error { display: none; padding: 10px 14px; border-radius: var(--radius-md); background: rgba(220, 53, 69, 0.2); border: 1px solid var(--status-red); color: #ffb4b4; margin-bottom: 16px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="brand" style="justify-content: center;">
+        <div class="brand-emblem">Z</div>
+        <div class="brand-text">
+          <h1>Z-BARBER</h1>
+          <span>— EST. 2025 —</span>
+        </div>
+      </div>
+
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-tab="login">Iniciar sesión</button>
+        <button type="button" class="auth-tab" data-tab="registro">Crear cuenta</button>
+      </div>
+
+      <div class="auth-error" id="auth-error"></div>
+
+      <form id="form-login">
+        <div class="form-group">
+          <label>Usuario</label>
+          <input type="text" id="login-usuario" required autocomplete="username" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="login-password" required autocomplete="current-password" class="form-control">
+        </div>
+        <button type="submit" class="btn-gold" style="width: 100%; justify-content: center; margin-top: 8px;">Ingresar</button>
+      </form>
+
+      <form id="form-registro" style="display: none;">
+        <div class="form-group">
+          <label>Nombre completo *</label>
+          <input type="text" id="reg-nombre" required class="form-control">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input type="text" id="reg-telefono" required class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="reg-email" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Usuario *</label>
+          <input type="text" id="reg-usuario" required autocomplete="username" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Contraseña * (mínimo 4 caracteres)</label>
+          <input type="password" id="reg-password" required minlength="4" autocomplete="new-password" class="form-control">
+        </div>
+        <button type="submit" class="btn-gold" style="width: 100%; justify-content: center; margin-top: 8px;">Registrarme</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>

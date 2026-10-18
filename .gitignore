@@ -1,0 +1,4 @@
+node_modules/
+.env
+# Comprobantes de pago y QR subidos (datos privados)
+uploads/
