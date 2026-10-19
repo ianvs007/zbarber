@@ -1,11 +1,27 @@
 /**
- * JavaScript Vainilla ES6+
- * Z-BARBER - Panel del Administrador: navegación, carga de datos y CRUD
+ * ==============================================================================
+ * PANEL DE ADMINISTRACIÓN - Z-BARBER (main.js)
+ * ==============================================================================
+ * Este archivo es el "cerebro" visual de la aplicación web:
+ * 1. Controla la sesión (solo permite entrar si eres el Administrador/dueño).
+ * 2. Administra la navegación entre pantallas (Dashboard, Reservas, Clientes,
+ *    Servicios, Barberos, Finanzas, etc.) sin recargar toda la página.
+ * 3. Mantiene en memoria (`AppState`) la información fresca descargada del servidor.
+ * 4. Gestiona los formularios para crear y editar datos (CRUD).
+ * ==============================================================================
  */
 
 const API_BASE = '/api';
 
-// Estado de la aplicación
+/**
+ * ESTADO DE LA APLICACIÓN (AppState)
+ * ------------------------------------------------------------------------------
+ * Funciona como una libreta de notas en la memoria del navegador donde guardamos:
+ * - activeView: Qué pantalla está viendo el administrador en este momento.
+ * - user: Los datos del administrador que inició sesión.
+ * - reservas, clientes, servicios, barberos: Listas completas de datos.
+ * - reportes: Totales de ingresos, gastos y ganancias.
+ */
 const AppState = {
   activeView: 'dashboard',
   user: null,
@@ -16,21 +32,25 @@ const AppState = {
   reportes: null
 };
 
+// PUNTO DE ENTRADA: Se ejecuta automáticamente cuando la página termina de cargar
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. Validar que el usuario tenga sesión abierta y sea administrador
   AppState.user = requireSession('admin');
-  if (!AppState.user) return;
+  if (!AppState.user) return; // Si no tiene permiso, requireSession lo redirige al login
 
+  // 2. Colocar el nombre del administrador y la fecha de hoy en la cabecera
   document.getElementById('sidebar-user').textContent = `${AppState.user.nombre_completo} (Admin)`;
   document.getElementById('btn-logout').addEventListener('click', () => Auth.cerrarSesion());
   document.getElementById('fecha-hoy').textContent = new Date().toLocaleDateString('es-BO', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  initNavigation();
-  initModals();
-  initCrudForms();
-  initReportes();
-  loadInitialData();
+  // 3. Encender los componentes del sistema
+  initNavigation();   // Enlazar los botones del menú lateral
+  initModals();       // Preparar las ventanas emergentes (modales)
+  initCrudForms();    // Preparar el envío de formularios
+  initReportes();     // Preparar los filtros de fechas de finanzas
+  loadInitialData();  // Descargar los datos reales desde la base de datos MySQL
 
-  // Mantiene al día los comprobantes nuevos y las reservas que vencen
+  // 4. Cada 1 minuto revisa si entraron pagos nuevos o si expiró alguna reserva
   setInterval(() => {
     if (!document.querySelector('.modal-overlay.active')) loadInitialData();
   }, 60 * 1000);
@@ -407,36 +427,65 @@ function initCrudForms() {
     }, 'Barbero registrado con éxito', formNuevoBarbero);
   });
 
+  // Formulario: Registro de un nuevo cliente
   const formNuevoCliente = document.getElementById('form-nuevo-cliente');
   formNuevoCliente?.addEventListener('submit', (e) => {
     e.preventDefault();
     enviarFormulario(`${API_BASE}/clientes`, 'POST', {
       nombre: document.getElementById('nuevo-cli-nombre').value,
+      usuario: document.getElementById('nuevo-cli-usuario')?.value || null,
       telefono: document.getElementById('nuevo-cli-telefono').value,
       email: document.getElementById('nuevo-cli-email').value || null,
       notas: document.getElementById('nuevo-cli-notas').value || null
     }, 'Cliente registrado con éxito', formNuevoCliente);
   });
 
+  // Formulario: Edición de datos personales de un cliente
   const formEditarCliente = document.getElementById('form-editar-cliente');
   formEditarCliente?.addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('edit-cli-id').value;
     enviarFormulario(`${API_BASE}/clientes/${id}`, 'PUT', {
       nombre: document.getElementById('edit-cli-nombre').value,
+      usuario: document.getElementById('edit-cli-usuario')?.value || null,
       telefono: document.getElementById('edit-cli-telefono').value,
       email: document.getElementById('edit-cli-email').value || null,
       notas: document.getElementById('edit-cli-notas').value || null
     }, 'Cliente actualizado con éxito');
   });
+
+  // Formulario: Resetear contraseña de cliente (Rol Administrador)
+  const formResetPasswordCliente = document.getElementById('form-reset-password-cliente');
+  formResetPasswordCliente?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('reset-cli-id').value;
+    const password = document.getElementById('reset-cli-password').value;
+    const confirmar = document.getElementById('reset-cli-confirmar').value;
+
+    if (password !== confirmar) {
+      alert('⚠️ La nueva contraseña y su confirmación no coinciden.');
+      return;
+    }
+
+    enviarFormulario(`${API_BASE}/clientes/${id}/password`, 'PUT', {
+      password_nueva: password
+    }, 'Contraseña del cliente actualizada con éxito', formResetPasswordCliente);
+  });
 }
 
+/**
+ * RENDERIZAR TABLA DE CLIENTES
+ * ------------------------------------------------------------------------------
+ * ¿Qué hace?
+ * Dibuja cada fila en el Directorio de Clientes. Muestra su ID, nombre, usuario web
+ * (si tiene), teléfono, email, número de visitas y los botones de acción (Editar, Clave, Eliminar).
+ */
 function renderClientes() {
   const tbody = document.getElementById('tbody-clientes');
   if (!tbody) return;
 
   if (AppState.clientes.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No hay clientes registrados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No hay clientes registrados.</td></tr>`;
     return;
   }
 
@@ -444,25 +493,32 @@ function renderClientes() {
     <tr>
       <td style="font-family: monospace; color: var(--text-muted);">#${String(c.id_cliente).padStart(3, '0')}</td>
       <td><strong>${escapeHtml(c.nombre)}</strong></td>
+      <td>${c.nombre_usuario ? `<span style="color: var(--gold-bright); font-family: monospace; font-size: 12px; font-weight: 600;">@${escapeHtml(c.nombre_usuario)}</span>` : '<span style="color: var(--text-muted); font-size: 11px;">(Sin usuario)</span>'}</td>
       <td>${escapeHtml(c.telefono)}</td>
       <td>${escapeHtml(c.email || '—')}</td>
       <td>${Number(c.total_visitas) || 0}</td>
       <td style="text-align: right;">
         <div class="acciones">
-          <button class="btn-gold" style="padding: 4px 10px; font-size: 11px;" onclick="abrirEditarCliente(${c.id_cliente})">Editar</button>
-          <button class="btn-accion rojo" onclick="eliminarCliente(${c.id_cliente})">Eliminar</button>
+          <button class="btn-gold" style="padding: 4px 10px; font-size: 11px;" onclick="abrirEditarCliente(${c.id_cliente})" title="Editar datos del cliente">Editar</button>
+          <button class="btn-accion dorado" style="padding: 4px 10px; font-size: 11px;" onclick="abrirResetPasswordCliente(${c.id_cliente})" title="Resetear contraseña a solicitud del cliente">Clave</button>
+          <button class="btn-accion rojo" onclick="eliminarCliente(${c.id_cliente})" title="Eliminar cliente">Eliminar</button>
         </div>
       </td>
     </tr>
   `).join('');
 }
 
+/**
+ * ABRIR VENTANA DE EDICIÓN DE CLIENTE
+ * Carga los datos actuales del cliente en las cajas de texto del modal.
+ */
 window.abrirEditarCliente = function(id) {
   const c = AppState.clientes.find(item => item.id_cliente === id);
   if (!c) return;
 
   document.getElementById('edit-cli-id').value = c.id_cliente;
   document.getElementById('edit-cli-nombre').value = c.nombre || '';
+  document.getElementById('edit-cli-usuario').value = c.nombre_usuario || '';
   document.getElementById('edit-cli-telefono').value = c.telefono || '';
   document.getElementById('edit-cli-email').value = c.email || '';
   document.getElementById('edit-cli-notas').value = c.notas || '';
@@ -470,6 +526,31 @@ window.abrirEditarCliente = function(id) {
   document.getElementById('modal-editar-cliente').classList.add('active');
 };
 
+/**
+ * ABRIR VENTANA DE RESETEO DE CONTRASEÑA
+ * Muestra el nombre y usuario del cliente, y limpia los campos para colocar la nueva clave.
+ */
+window.abrirResetPasswordCliente = function(id) {
+  const c = AppState.clientes.find(item => item.id_cliente === id);
+  if (!c) return;
+
+  document.getElementById('reset-cli-id').value = c.id_cliente;
+  document.getElementById('reset-cli-password').value = '';
+  document.getElementById('reset-cli-confirmar').value = '';
+
+  const infoEl = document.getElementById('reset-cli-info');
+  if (infoEl) {
+    infoEl.innerHTML = `Cliente: <strong>${escapeHtml(c.nombre)}</strong> ${c.nombre_usuario ? `· Usuario de acceso: <span style="color: var(--gold-bright); font-weight: bold;">${escapeHtml(c.nombre_usuario)}</span>` : '<br><span style="color: var(--text-muted); font-size: 11px;">(El cliente aún no tenía cuenta web, se le creará una automáticamente)</span>'}`;
+  }
+
+  document.getElementById('modal-reset-password-cliente').classList.add('active');
+};
+
+/**
+ * ELIMINAR CLIENTE
+ * Pide confirmación al administrador y se comunica con la API para borrar al cliente.
+ * Si el cliente tiene citas activas o pasadas, el servidor responderá bloqueando la acción.
+ */
 window.eliminarCliente = async function(id) {
   const alertBox = document.getElementById('alert-clientes');
   if (alertBox) alertBox.style.display = 'none';

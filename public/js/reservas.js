@@ -1,14 +1,30 @@
 /**
- * Módulo de Reservas y Pagos del Administrador - Z-BARBER
- * Revisión de comprobantes QR, atención, inasistencia, cancelación, reembolsos y atención presencial
+ * ==============================================================================
+ * MÓDULO DE RESERVAS Y PAGOS - Z-BARBER (PANEL ADMINISTRADOR)
+ * ==============================================================================
+ * Este archivo gestiona la pantalla principal de la agenda y caja de la barbería:
+ * - Filtra las citas por estado (confirmadas, atendidas, pendientes, etc.) y por fecha.
+ * - Muestra las opciones que el barbero/dueño puede hacer con cada cita:
+ *     * "Revisar pago": Abrir el comprobante QR para verificar que el cliente pagó.
+ *     * "Atender": Registrar que el cliente ya recibió su corte y cobrar el saldo.
+ *     * "No asistió": Marcar si el cliente faltó a su cita.
+ *     * "Cancelar": Cancelar una cita si el cliente no puede venir.
+ *     * "Marcar reembolsado": Registrar cuando se devolvió el dinero al cliente.
+ * ==============================================================================
  */
 
+// Memoria temporal para saber qué cita o pago se está revisando en los modales
 const ReservasState = {
   pagoEnRevision: null,
   reservaPorAtender: null,
   urlComprobante: null
 };
 
+/**
+ * FILTRAR RESERVAS
+ * Toma todas las citas recibidas del servidor y devuelve solo las que coincidan
+ * con lo que el usuario eligió en los filtros (estado, fecha o texto del buscador).
+ */
 function filtrarReservas() {
   const estado = document.getElementById('filtro-estado')?.value || 'all';
   const fecha = document.getElementById('filtro-fecha')?.value || '';
@@ -22,26 +38,34 @@ function filtrarReservas() {
   );
 }
 
+/**
+ * BOTONES DE ACCIÓN PARA CADA CITA
+ * Decide qué botones mostrar según la situación de la cita:
+ * - Si pagó por QR pero aún no fue verificado: botón "Revisar pago".
+ * - Si ya está confirmada y el cliente llega: botón "Atender" para cobrar el saldo.
+ * - Si ya pasó la hora y el cliente no vino: botón "No asistió".
+ * - Si la cita no se va a realizar: botón "Cancelar".
+ */
 function accionesReserva(r) {
   const acciones = [];
   const porAtender = ['pendiente', 'confirmada', 'en_espera'].includes(r.estado);
 
   if (r.estado === 'en_revision' && r.id_pago) {
-    acciones.push(`<button class="btn-accion dorado" onclick="abrirRevisionPago(${r.id_reserva})">Revisar pago</button>`);
+    acciones.push(`<button class="btn-accion dorado" onclick="abrirRevisionPago(${r.id_reserva})" title="Ver comprobante para aprobar o rechazar">Revisar pago</button>`);
   } else if (r.id_pago && r.pago_metodo === 'qr') {
-    acciones.push(`<button class="btn-accion" onclick="abrirRevisionPago(${r.id_reserva})">Comprobante</button>`);
+    acciones.push(`<button class="btn-accion" onclick="abrirRevisionPago(${r.id_reserva})" title="Ver imagen del comprobante bancario">Comprobante</button>`);
   }
   if (porAtender) {
-    acciones.push(`<button class="btn-accion verde" onclick="abrirAtender(${r.id_reserva})">Atender</button>`);
+    acciones.push(`<button class="btn-accion verde" onclick="abrirAtender(${r.id_reserva})" title="Finalizar servicio y cobrar saldo">Atender</button>`);
     if (r.minutos_para_cita <= 0) {
-      acciones.push(`<button class="btn-accion" onclick="marcarNoAsistio(${r.id_reserva})">No asistió</button>`);
+      acciones.push(`<button class="btn-accion" onclick="marcarNoAsistio(${r.id_reserva})" title="Marcar inasistencia del cliente">No asistió</button>`);
     }
   }
   if (porAtender || r.estado === 'pendiente_pago') {
-    acciones.push(`<button class="btn-accion rojo" onclick="cancelarReservaAdmin(${r.id_reserva})">Cancelar</button>`);
+    acciones.push(`<button class="btn-accion rojo" onclick="cancelarReservaAdmin(${r.id_reserva})" title="Cancelar la cita">Cancelar</button>`);
   }
   if (r.pago_estado === 'por_reembolsar') {
-    acciones.push(`<button class="btn-accion azul" onclick="marcarReembolsado(${r.id_pago}, ${Number(r.pago_monto)})">Marcar reembolsado</button>`);
+    acciones.push(`<button class="btn-accion azul" onclick="marcarReembolsado(${r.id_pago}, ${Number(r.pago_monto)})" title="Confirmar que se devolvió el dinero">Marcar reembolsado</button>`);
   }
   return acciones.join('');
 }
