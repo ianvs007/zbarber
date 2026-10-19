@@ -183,11 +183,11 @@ function renderServicios() {
         <td>${s.duracion_min} min</td>
         <td>${pendientes > 0 ? `<span class="badge badge-yellow">${pendientes} activa(s)</span>` : '<span style="color: var(--text-muted); font-size: 11px;">0 pendientes</span>'}</td>
         <td><span class="badge ${isActivo ? 'badge-green' : 'badge-red'}">${isActivo ? 'Activo' : 'En pausa'}</span></td>
-        <td style="text-align: right;">
-          <div class="acciones">
-            <button class="btn-gold" style="padding: 4px 10px; font-size: 11px;" onclick="abrirEditarServicio(${s.id_servicio})">Editar</button>
-            <button class="btn-accion" onclick="togglePausarServicio(${s.id_servicio})">${isActivo ? 'Pausar' : 'Activar'}</button>
-            <button class="btn-accion rojo" onclick="eliminarServicio(${s.id_servicio})">Eliminar</button>
+        <td style="text-align: center;">
+          <div class="acciones-verticales">
+            <button class="btn-gold" onclick="abrirEditarServicio(${s.id_servicio})" title="Editar datos del servicio">Editar</button>
+            <button class="btn-accion" onclick="togglePausarServicio(${s.id_servicio})" title="${isActivo ? 'Pausar servicio' : 'Activar servicio'}">${isActivo ? 'Pausar' : 'Activar'}</button>
+            <button class="btn-accion rojo" onclick="eliminarServicio(${s.id_servicio})" title="Eliminar servicio">Eliminar</button>
           </div>
         </td>
       </tr>
