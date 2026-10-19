@@ -497,10 +497,10 @@ function renderClientes() {
       <td>${escapeHtml(c.telefono)}</td>
       <td>${escapeHtml(c.email || '—')}</td>
       <td>${Number(c.total_visitas) || 0}</td>
-      <td style="text-align: right;">
-        <div class="acciones">
-          <button class="btn-gold" style="padding: 4px 10px; font-size: 11px;" onclick="abrirEditarCliente(${c.id_cliente})" title="Editar datos del cliente">Editar</button>
-          <button class="btn-accion dorado" style="padding: 4px 10px; font-size: 11px;" onclick="abrirResetPasswordCliente(${c.id_cliente})" title="Resetear contraseña a solicitud del cliente">Clave</button>
+      <td style="text-align: center;">
+        <div class="acciones-verticales">
+          <button class="btn-gold" onclick="abrirEditarCliente(${c.id_cliente})" title="Editar datos del cliente">Editar</button>
+          <button class="btn-accion dorado" onclick="abrirResetPasswordCliente(${c.id_cliente})" title="Resetear contraseña a solicitud del cliente">Clave</button>
           <button class="btn-accion rojo" onclick="eliminarCliente(${c.id_cliente})" title="Eliminar cliente">Eliminar</button>
         </div>
       </td>

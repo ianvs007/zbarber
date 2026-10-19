@@ -494,6 +494,26 @@ body {
   margin: 0 auto;
 }
 
+/* Botones de acción alineados verticalmente (1 por línea) con ancho uniforme */
+.acciones-verticales {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+}
+.acciones-verticales .btn-accion,
+.acciones-verticales .btn-gold {
+  width: 76px;
+  padding: 5px 0;
+  font-size: 11px;
+  border-radius: 6px;
+  text-align: center;
+  justify-content: center;
+  box-sizing: border-box;
+  display: inline-flex;
+}
+
 /* Alineación a la izquierda y tabulación francesa en columna Estado */
 .estado-stack {
   display: flex;
